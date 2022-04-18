@@ -1,0 +1,330 @@
+entity = Parent | Child | Other i.e. Transaction?
+normalize = lambda e: Transaction: [getattr(e, col_name, "NA") for col_name in [...]]
+for-lxml.iterread-voucher
+ans.append(normalize(entity))
+df.write_excel
+
+class Transaction(object): # <VOUCHER ... VCHTYPE="Receipt"
+	"""base type"""
+	def __init__(self, vch_no, txn_date):
+		self.vch_type = "Receipt"
+		self.vch_no = VOUCHER/VOUCHERNUMBER.text
+		self.txn_date = VOUCHER/DATE|EFFECTIVEDATE.text
+		return
+
+class Parent(Transaction):
+	txn_type = "Parent"
+	narration: str = VOUCHER/PARTYLEDGERNAME.text
+	reported_amt: Decimal = VOUCHER/ALLLEDGERENTRIES.LIST/anonObj[n=0]i.e.WITH"BILLALLOCATIONS.LIST"/AMOUNT.text
+	amt_verified: bool = reported_amt==E(all Child.ref_amount in curr voucher;; BLANK if 0 Child or if any Child.ref_amount is blank)
+
+class Child(Transaction): # VOUCHER/ALLLEDGERENTRIES.LIST/anonObj[n=0]i.e.WITH"BILLALLOCATIONS.LIST" != ""
+	txn_type = "Child"
+	narration: str = LEDGERNAME.text
+	# for all anon objs in BILLALLOCATIONS.LIST
+	ref_no: str = NAME.text
+	ref_type: str = BILLTYPE.text
+	ref_date: str = str() #spec unclear, no e.g. with ref date non-blank
+	ref_amount: Decimal = AMOUNT.text
+
+class OtherOffspring(Transaction): # VOUCHER/ALLLEDGERENTRIES.LIST/anonObj[n=-1]i.e.WITH"BANKALLOCATIONS.LIST" != ""
+	txn_type = "Other"
+	narration: str = LEDGERNAME.text
+	reported_amt: Decimal = AMOUNT.text # 
+
+nth_node = {
+	"VOUCHER": {
+		"_REMOTEID": "2d336634-5ba5-4c60-b837-110fe020c146-0000f1b7",
+		"_VCHKEY": "2d336634-5ba5-4c60-b837-110fe020c146-0000abec:00000064",
+		"_VCHTYPE": "Receipt",
+		"_ACTION": "Create",
+		"_OBJVIEW": "Accounting Voucher View"
+		"OLDAUDITENTRYIDS.LIST": {
+			"_TYPE": "Number"
+			"OLDAUDITENTRYIDS": "-1",
+		},
+		"DATE": "20200701",
+		"GUID": "2d336634-5ba5-4c60-b837-110fe020c146-0000f1b7",
+		"TAXUNITNAME": "Ware -House (Mankoli-Bhiwandi)",
+		"VOUCHERTYPENAME": "Receipt",
+		"VOUCHERNUMBER": "397",
+		"PARTYLEDGERNAME": "Ajit Cycle Stores",
+		"CSTFORMISSUETYPE": "",
+		"CSTFORMRECVTYPE": "",
+		"FBTPAYMENTTYPE": "Default",
+		"PERSISTEDVIEW": "Accounting Voucher View",
+		"VCHGSTCLASS": "",
+		"ENTEREDBY": "probike",
+		"DIFFACTUALQTY": "No",
+		"ISMSTFROMSYNC": "No",
+		"ASORIGINAL": "No",
+		"AUDITED": "No",
+		"FORJOBCOSTING": "No",
+		"ISOPTIONAL": "No",
+		"EFFECTIVEDATE": "20200701",
+		"USEFOREXCISE": "No",
+		"ISFORJOBWORKIN": "No",
+		"ALLOWCONSUMPTION": "No",
+		"USEFORINTEREST": "No",
+		"USEFORGAINLOSS": "No",
+		"USEFORGODOWNTRANSFER": "No",
+		"USEFORCOMPOUND": "No",
+		"USEFORSERVICETAX": "No",
+		"ISEXCISEVOUCHER": "No",
+		"EXCISETAXOVERRIDE": "No",
+		"USEFORTAXUNITTRANSFER": "No",
+		"IGNOREPOSVALIDATION": "No",
+		"EXCISEOPENING": "No",
+		"USEFORFINALPRODUCTION": "No",
+		"ISTDSOVERRIDDEN": "No",
+		"ISTCSOVERRIDDEN": "No",
+		"ISTDSTCSCASHVCH": "No",
+		"INCLUDEADVPYMTVCH": "No",
+		"ISSUBWORKSCONTRACT": "No",
+		"ISVATOVERRIDDEN": "No",
+		"IGNOREORIGVCHDATE": "No",
+		"ISVATPAIDATCUSTOMS": "No",
+		"ISDECLAREDTOCUSTOMS": "No",
+		"ISSERVICETAXOVERRIDDEN": "No",
+		"ISISDVOUCHER": "No",
+		"ISEXCISEOVERRIDDEN": "No",
+		"ISEXCISESUPPLYVCH": "No",
+		"ISGSTOVERRIDDEN": "No",
+		"GSTNOTEXPORTED": "No",
+		"IGNOREGSTINVALIDATION": "No",
+		"ISVATPRINCIPALACCOUNT": "No",
+		"ISBOENOTAPPLICABLE": "No",
+		"ISSHIPPINGWITHINSTATE": "No",
+		"ISOVERSEASTOURISTTRANS": "No",
+		"ISDESIGNATEDZONEPARTY": "No",
+		"ISCANCELLED": "No",
+		"HASCASHFLOW": "Yes",
+		"ISPOSTDATED": "No",
+		"USETRACKINGNUMBER": "No",
+		"ISINVOICE": "No",
+		"MFGJOURNAL": "No",
+		"HASDISCOUNTS": "No",
+		"ASPAYSLIP": "No",
+		"ISCOSTCENTRE": "No",
+		"ISSTXNONREALIZEDVCH": "No",
+		"ISEXCISEMANUFACTURERON": "No",
+		"ISBLANKCHEQUE": "No",
+		"ISVOID": "No",
+		"ISONHOLD": "No",
+		"ORDERLINESTATUS": "No",
+		"VATISAGNSTCANCSALES": "No",
+		"VATISPURCEXEMPTED": "No",
+		"ISVATRESTAXINVOICE": "No",
+		"VATISASSESABLECALCVCH": "No",
+		"ISVATDUTYPAID": "Yes",
+		"ISDELIVERYSAMEASCONSIGNEE": "No",
+		"ISDISPATCHSAMEASCONSIGNOR": "No",
+		"ISDELETED": "No",
+		"CHANGEVCHMODE": "No",
+		"ALTERID": "138379",
+		"MASTERID": "61879",
+		"VOUCHERKEY": "189030100631652",
+		"EXCLUDEDTAXATIONS.LIST": "",
+		"OLDAUDITENTRIES.LIST": "",
+		"ACCOUNTAUDITENTRIES.LIST": "",
+		"AUDITENTRIES.LIST": "",
+		"DUTYHEADDETAILS.LIST": "",
+		"SUPPLEMENTARYDUTYHEADDETAILS.LIST": "",
+		"EWAYBILLDETAILS.LIST": "",
+		"INVOICEDELNOTES.LIST": "",
+		"INVOICEORDERLIST.LIST": "",
+		"INVOICEINDENTLIST.LIST": "",
+		"ATTENDANCEENTRIES.LIST": "",
+		"ORIGINVOICEDETAILS.LIST": "",
+		"INVOICEEXPORTLIST.LIST": "",
+		"ALLLEDGERENTRIES.LIST": [
+			{
+				"OLDAUDITENTRYIDS.LIST": {
+					"_TYPE": "Number"
+					"OLDAUDITENTRYIDS": "-1",
+				},
+				"LEDGERNAME": "Ajit Cycle Stores",
+				"GSTCLASS": "",
+				"ISDEEMEDPOSITIVE": "No",
+				"LEDGERFROMITEM": "No",
+				"REMOVEZEROENTRIES": "No",
+				"ISPARTYLEDGER": "Yes",
+				"ISLASTDEEMEDPOSITIVE": "No",
+				"ISCAPVATTAXALTERED": "No",
+				"ISCAPVATNOTCLAIMED": "No",
+				"AMOUNT": "221979.00",
+				"VATEXPAMOUNT": "221979.00",
+				"SERVICETAXDETAILS.LIST": "",
+				"BANKALLOCATIONS.LIST": "",
+				"BILLALLOCATIONS.LIST": [
+					{
+						"NAME": "SSI19202245",
+						"BILLTYPE": "Agst Ref",
+						"TDSDEDUCTEEISSPECIALRATE": "No",
+						"AMOUNT": "55.00",
+						"INTERESTCOLLECTION.LIST": "",
+						"STBILLCATEGORIES.LIST": ""
+					},
+					{
+						"NAME": "SSI19202246",
+						"BILLTYPE": "Agst Ref",
+						"TDSDEDUCTEEISSPECIALRATE": "No",
+						"AMOUNT": "2572.00",
+						"INTERESTCOLLECTION.LIST": "",
+						"STBILLCATEGORIES.LIST": ""
+					},
+					{
+						"NAME": "SSI19202600",
+						"BILLTYPE": "Agst Ref",
+						"TDSDEDUCTEEISSPECIALRATE": "No",
+						"AMOUNT": "941.00",
+						"INTERESTCOLLECTION.LIST": "",
+						"STBILLCATEGORIES.LIST": ""
+					},
+					{
+						"NAME": "SSICN/19-20/470",
+						"BILLTYPE": "Agst Ref",
+						"TDSDEDUCTEEISSPECIALRATE": "No",
+						"AMOUNT": "-3068.00",
+						"INTERESTCOLLECTION.LIST": "",
+						"STBILLCATEGORIES.LIST": ""
+					},
+					{
+						"NAME": "SSICN/19-20/471",
+						"BILLTYPE": "Agst Ref",
+						"TDSDEDUCTEEISSPECIALRATE": "No",
+						"AMOUNT": "-500.00",
+						"INTERESTCOLLECTION.LIST": "",
+						"STBILLCATEGORIES.LIST": ""
+					},
+					{
+						"NAME": "SSI19202955",
+						"BILLTYPE": "Agst Ref",
+						"TDSDEDUCTEEISSPECIALRATE": "No",
+						"AMOUNT": "699.00",
+						"INTERESTCOLLECTION.LIST": "",
+						"STBILLCATEGORIES.LIST": ""
+					},
+					{
+						"NAME": "SSI20210333",
+						"BILLTYPE": "Agst Ref",
+						"TDSDEDUCTEEISSPECIALRATE": "No",
+						"AMOUNT": "28476.00",
+						"INTERESTCOLLECTION.LIST": "",
+						"STBILLCATEGORIES.LIST": ""
+					},
+					{
+						"NAME": "SSI20210334",
+						"BILLTYPE": "Agst Ref",
+						"TDSDEDUCTEEISSPECIALRATE": "No",
+						"AMOUNT": "75684.00",
+						"INTERESTCOLLECTION.LIST": "",
+						"STBILLCATEGORIES.LIST": ""
+					},
+					{
+						"NAME": "SSI20210335",
+						"BILLTYPE": "Agst Ref",
+						"TDSDEDUCTEEISSPECIALRATE": "No",
+						"AMOUNT": "90811.00",
+						"INTERESTCOLLECTION.LIST": "",
+						"STBILLCATEGORIES.LIST": ""
+					},
+					{
+						"NAME": "SSI20210336",
+						"BILLTYPE": "Agst Ref",
+						"TDSDEDUCTEEISSPECIALRATE": "No",
+						"AMOUNT": "26309.00",
+						"INTERESTCOLLECTION.LIST": "",
+						"STBILLCATEGORIES.LIST": ""
+					}
+				],
+				"INTERESTCOLLECTION.LIST": "",
+				"OLDAUDITENTRIES.LIST": "",
+				"ACCOUNTAUDITENTRIES.LIST": "",
+				"AUDITENTRIES.LIST": "",
+				"INPUTCRALLOCS.LIST": "",
+				"DUTYHEADDETAILS.LIST": "",
+				"EXCISEDUTYHEADDETAILS.LIST": "",
+				"RATEDETAILS.LIST": "",
+				"SUMMARYALLOCS.LIST": "",
+				"STPYMTDETAILS.LIST": "",
+				"EXCISEPAYMENTALLOCATIONS.LIST": "",
+				"TAXBILLALLOCATIONS.LIST": "",
+				"TAXOBJECTALLOCATIONS.LIST": "",
+				"TDSEXPENSEALLOCATIONS.LIST": "",
+				"VATSTATUTORYDETAILS.LIST": "",
+				"COSTTRACKALLOCATIONS.LIST": "",
+				"REFVOUCHERDETAILS.LIST": "",
+				"INVOICEWISEDETAILS.LIST": "",
+				"VATITCDETAILS.LIST": "",
+				"ADVANCETAXDETAILS.LIST": ""
+			},
+			{
+				"OLDAUDITENTRYIDS.LIST": {
+					"_TYPE": "Number"
+					"OLDAUDITENTRYIDS": "-1",
+				},
+				"LEDGERNAME": "Standard Chartered Bank",
+				"GSTCLASS": "",
+				"ISDEEMEDPOSITIVE": "Yes",
+				"LEDGERFROMITEM": "No",
+				"REMOVEZEROENTRIES": "No",
+				"ISPARTYLEDGER": "Yes",
+				"ISLASTDEEMEDPOSITIVE": "Yes",
+				"ISCAPVATTAXALTERED": "No",
+				"ISCAPVATNOTCLAIMED": "No",
+				"AMOUNT": "-221979.00",
+				"VATEXPAMOUNT": "-221979.00",
+				"SERVICETAXDETAILS.LIST": "",
+				"BANKALLOCATIONS.LIST": {
+					"DATE": "20200701",
+					"INSTRUMENTDATE": "20200701",
+					"BANKERSDATE": "20200701",
+					"NAME": "9d64e6ef-0a1f-470b-8152-5281af41c553",
+					"TRANSACTIONTYPE": "Inter Bank Transfer",
+					"PAYMENTFAVOURING": "Ajit Cycle Stores",
+					"TRANSFERMODE": "RTGS",
+					"UNIQUEREFERENCENUMBER": "4z9qdSyDp6B0SJpg",
+					"STATUS": "No",
+					"PAYMENTMODE": "Transacted",
+					"BANKPARTYNAME": "Ajit Cycle Stores",
+					"ISCONNECTEDPAYMENT": "No",
+					"ISSPLIT": "No",
+					"ISCONTRACTUSED": "No",
+					"ISACCEPTEDWITHWARNING": "No",
+					"ISTRANSFORCED": "No",
+					"CHEQUEPRINTED": "1",
+					"AMOUNT": "-221979.00",
+					"CONTRACTDETAILS.LIST": "",
+					"BANKSTATUSINFO.LIST": ""
+				},
+				"BILLALLOCATIONS.LIST": "",
+				"INTERESTCOLLECTION.LIST": "",
+				"OLDAUDITENTRIES.LIST": "",
+				"ACCOUNTAUDITENTRIES.LIST": "",
+				"AUDITENTRIES.LIST": "",
+				"INPUTCRALLOCS.LIST": "",
+				"DUTYHEADDETAILS.LIST": "",
+				"EXCISEDUTYHEADDETAILS.LIST": "",
+				"RATEDETAILS.LIST": "",
+				"SUMMARYALLOCS.LIST": "",
+				"STPYMTDETAILS.LIST": "",
+				"EXCISEPAYMENTALLOCATIONS.LIST": "",
+				"TAXBILLALLOCATIONS.LIST": "",
+				"TAXOBJECTALLOCATIONS.LIST": "",
+				"TDSEXPENSEALLOCATIONS.LIST": "",
+				"VATSTATUTORYDETAILS.LIST": "",
+				"COSTTRACKALLOCATIONS.LIST": "",
+				"REFVOUCHERDETAILS.LIST": "",
+				"INVOICEWISEDETAILS.LIST": "",
+				"VATITCDETAILS.LIST": "",
+				"ADVANCETAXDETAILS.LIST": ""
+			}
+		],
+		"PAYROLLMODEOFPAYMENT.LIST": "",
+		"ATTDRECORDS.LIST": "",
+		"GSTEWAYCONSIGNORADDRESS.LIST": "",
+		"GSTEWAYCONSIGNEEADDRESS.LIST": "",
+		"TEMPGSTRATEDETAILS.LIST": "",
+	}
+}
