@@ -10,3 +10,10 @@ To parse XML export of Tally's transactions and convert it into `.xlsx` file acc
  * optimization
   * NOTE: avoid until confident about correctness
  * robust code
+
+## How to use?
+
+Please ensure to install all dependencies via requirements.txt
+
+ 1. provide path to input xml via cli e.g. `python parse.py spec/1-input.xml`, or
+ 2. spin up server with `uvicorn server:app --reload` and visit `localhost:8000/docs`, find green colored POST button there, insert properly formatted (" escaped, etc.) in request body and wait for the response.
