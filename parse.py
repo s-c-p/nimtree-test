@@ -85,44 +85,56 @@ with open("1-input.xml", mode="rt") as fo:
 
 ans = list()
 soup = BeautifulSoup(xmlstring, "lxml")
-for record in soup.findAll('voucher', attrs={'vchtype': 'Receipt'}):
+for r, record in enumerate(soup.findAll(
+	'voucher', attrs={'vchtype': 'Receipt'}
+)):
 	buffer = list()
 	vch_no = record.find('vouchernumber').text
 	txn_date = record.find('date').text
 	main_narration = record.find('partyledgername').text
-	buffer.append(Parent(vch_no, txn_date, main_narration))
+	buffer.append(
+		Parent(vch_no, txn_date, main_narration)
+	)
 	ales = record.findAll('allledgerentries.list')
-	for es in ales:
-		local_narration = es.find('ledgername').text
-		x = es.findAll('billallocations.list')
-		try:
-			assert len(x) == 1, f"ledger entry #i has more than one bill allocations"
-		except AssertionError:
-			breakpoint()
-		bill_alloc = x[0].text.strip()
-		y = es.findAll('bankallocations.list')
-		assert len(y) == 1, f"ledger entry #i has more than one bank allocations"
-		bank_alloc = y[0].text.strip()
-		if bill_alloc and not bank_alloc:
+	for a, es in enumerate(ales):
+		local_narration = es.find('ledgername').text	# should this be nested? 
+		x = es.findAll('bankallocations.list')
+		assert len(x) == 1, f"ledger entry {r}.{a} has more than one bank allocations"
+		bank_alloc = x[0].text.strip()
+		if not bank_alloc:
+			# assumes bank/other details are in its own "allledegerentries.list" seprate
+			# from voucher details
 			buffer[0].reported_amt = Decimal(es.find('amount').text)
 			x, y = build_children(es, local_narration, vch_no, txn_date)
 			buffer.extend(x)
 			buffer[0].amt_verified = "Yes" if buffer[0].reported_amt == sum(y) else "No"
-		elif bank_alloc and not bill_alloc:
-			buffer.append(build_other(es, local_narration, vch_no, txn_date))
 		else:
-			logging.warn("Strange shape of data")
+			x = es.findAll('billallocations.list')
+			try: assert len(x) == 1, f"ledger entry {r}.{a} has more than one bill allocations"
+			except AssertionError: breakpoint()
+			bill_alloc = x[0].text.strip()
+			if bill_alloc:
+				logging.warn(f"Strange shape of data at {r}.{a}")
+			else:
+				buffer.append(build_other(es, local_narration, vch_no, txn_date))
 	ans.extend(buffer)
 
-breakpoint()
+# breakpoint()
 
-df = pandas.DataFrame(columns=col_attr.keys())
-for record in ans:
-	df.append(
-		{
-			colname: getattr(record, attrname, "NA")
-			for colname, attrname in col_attr.items()
-		},
-		ignore_index=True
-	)
+df = pandas.DataFrame.from_records([
+	{
+		colname: getattr(record, attrname, "NA")
+		for colname, attrname in col_attr.items()
+	}
+	for record in ans
+])
 
+df['Date'] = pandas.to_datetime(df['Date'])
+df['Date'] = df['Date'].dt.strftime('%d-%m-%Y')
+df['Vch Type'] = "Receipt"
+df = df[[
+	"Date", "Transaction Type", "Vch No.", "Ref No", "Ref Type",
+	"Ref Date", "Debtor", "Ref Amount", "Amount", "Particulars",
+	"Vch Type", "Amount Verified"
+]]
+df.to_excel("output.xlsx", index=False)
