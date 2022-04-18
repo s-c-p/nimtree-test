@@ -2,3 +2,5 @@ bs4
 lxml
 pandas
 openpyxl
+fastapi
+uvicorn[standard]
