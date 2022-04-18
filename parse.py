@@ -80,61 +80,66 @@ def build_other(node, narration, vch_no, txn_date):
 		reported_amt=Decimal(node.find('amount').text)
 	)
 
-with open("1-input.xml", mode="rt") as fo:
-	xmlstring = fo.read()
-
-ans = list()
-soup = BeautifulSoup(xmlstring, "lxml")
-for r, record in enumerate(soup.findAll(
-	'voucher', attrs={'vchtype': 'Receipt'}
-)):
-	buffer = list()
-	vch_no = record.find('vouchernumber').text
-	txn_date = record.find('date').text
-	main_narration = record.find('partyledgername').text
-	buffer.append(
-		Parent(vch_no, txn_date, main_narration)
-	)
-	ales = record.findAll('allledgerentries.list')
-	for a, es in enumerate(ales):
-		local_narration = es.find('ledgername').text	# should this be nested? 
-		x = es.findAll('bankallocations.list')
-		assert len(x) == 1, f"ledger entry {r}.{a} has more than one bank allocations"
-		bank_alloc = x[0].text.strip()
-		if not bank_alloc:
-			# assumes bank/other details are in its own "allledegerentries.list" seprate
-			# from voucher details
-			buffer[0].reported_amt = Decimal(es.find('amount').text)
-			x, y = build_children(es, local_narration, vch_no, txn_date)
-			buffer.extend(x)
-			buffer[0].amt_verified = "Yes" if buffer[0].reported_amt == sum(y) else "No"
-		else:
-			x = es.findAll('billallocations.list')
-			try: assert len(x) == 1, f"ledger entry {r}.{a} has more than one bill allocations"
-			except AssertionError: breakpoint()
-			bill_alloc = x[0].text.strip()
-			if bill_alloc:
-				logging.warn(f"Strange shape of data at {r}.{a}")
+def parse(xmlstring):
+	ans = list()
+	soup = BeautifulSoup(xmlstring, "lxml")
+	for r, record in enumerate(soup.findAll(
+		'voucher', attrs={'vchtype': 'Receipt'}
+	)):
+		buffer = list()
+		vch_no = record.find('vouchernumber').text
+		txn_date = record.find('date').text
+		main_narration = record.find('partyledgername').text
+		buffer.append(
+			Parent(vch_no, txn_date, main_narration)
+		)
+		ales = record.findAll('allledgerentries.list')
+		for a, es in enumerate(ales):
+			local_narration = es.find('ledgername').text	# should this be nested? 
+			x = es.findAll('bankallocations.list')
+			assert len(x) == 1, f"ledger entry {r}.{a} has more than one bank allocations"
+			bank_alloc = x[0].text.strip()
+			if not bank_alloc:
+				# assumes bank/other details are in its own "allledegerentries.list" seprate
+				# from voucher details
+				buffer[0].reported_amt = Decimal(es.find('amount').text)
+				x, y = build_children(es, local_narration, vch_no, txn_date)
+				buffer.extend(x)
+				buffer[0].amt_verified = "Yes" if buffer[0].reported_amt == sum(y) else "No"
 			else:
-				buffer.append(build_other(es, local_narration, vch_no, txn_date))
-	ans.extend(buffer)
+				x = es.findAll('billallocations.list')
+				try: assert len(x) == 1, f"ledger entry {r}.{a} has more than one bill allocations"
+				except AssertionError: breakpoint()
+				bill_alloc = x[0].text.strip()
+				if bill_alloc:
+					logging.warn(f"Strange shape of data at {r}.{a}")
+				else:
+					buffer.append(build_other(es, local_narration, vch_no, txn_date))
+		ans.extend(buffer)
+	return ans
 
-# breakpoint()
+def main(xmlstring, xml_output="output.xlsx"):
+	ans = parse(xmlstring)
+	df = pandas.DataFrame.from_records([
+		{
+			colname: getattr(record, attrname, "NA")
+			for colname, attrname in col_attr.items()
+		}
+		for record in ans
+	])
 
-df = pandas.DataFrame.from_records([
-	{
-		colname: getattr(record, attrname, "NA")
-		for colname, attrname in col_attr.items()
-	}
-	for record in ans
-])
+	df['Date'] = pandas.to_datetime(df['Date'])
+	df['Date'] = df['Date'].dt.strftime('%d-%m-%Y')
+	df['Vch Type'] = "Receipt"
+	df = df[[
+		"Date", "Transaction Type", "Vch No.", "Ref No", "Ref Type",
+		"Ref Date", "Debtor", "Ref Amount", "Amount", "Particulars",
+		"Vch Type", "Amount Verified"
+	]]
+	df.to_excel(xml_output, index=False)
 
-df['Date'] = pandas.to_datetime(df['Date'])
-df['Date'] = df['Date'].dt.strftime('%d-%m-%Y')
-df['Vch Type'] = "Receipt"
-df = df[[
-	"Date", "Transaction Type", "Vch No.", "Ref No", "Ref Type",
-	"Ref Date", "Debtor", "Ref Amount", "Amount", "Particulars",
-	"Vch Type", "Amount Verified"
-]]
-df.to_excel("output.xlsx", index=False)
+if __name__ == '__main__':
+	import sys
+	with open(sys.argv[1], mode="rt") as fo:
+		xmlstring = fo.read()
+	main(xmlstring)
