@@ -1,3 +1,4 @@
+import os
 import pandas
 from decimal import Decimal
 from bs4 import BeautifulSoup
@@ -137,6 +138,7 @@ def main(xmlstring, xml_output="output.xlsx"):
 		"Vch Type", "Amount Verified"
 	]]
 	df.to_excel(xml_output, index=False)
+	return xml_output, os.stat(xml_output).st_size
 
 if __name__ == '__main__':
 	import sys
